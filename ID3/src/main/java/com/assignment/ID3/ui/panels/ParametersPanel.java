@@ -5,7 +5,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class ParametersPanel extends JPanel {
-	
+
 	private static final long serialVersionUID = 1L;
 	private final String TITLE = "Parameters";
 
@@ -14,12 +14,8 @@ public class ParametersPanel extends JPanel {
 	private JTextField param1Text = new JTextField();
 
 	public ParametersPanel() {
-	}
-
-	public JPanel generate() {
 		add(titleLabel);
 		add(param1Label);
 		add(param1Text);
-		return this;
 	}
 }

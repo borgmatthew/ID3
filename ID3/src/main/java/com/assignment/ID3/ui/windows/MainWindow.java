@@ -23,7 +23,6 @@ public class MainWindow extends JFrame{
 
 	public MainWindow(){
 		initGraphics();
-		generatePanes();
 		buildLayout();
 	}
 	
@@ -54,11 +53,5 @@ public class MainWindow extends JFrame{
 		constraints.gridwidth = gridWidth;
 		constraints.gridheight = gridHeight;
 		return constraints;
-	}
-	
-	private void generatePanes(){
-		dataSet.generate();
-		parameters.generate();
-		graph.generate();
 	}
 }
