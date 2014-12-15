@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Record {
 
-	private ArrayList<Field<?>> values;
+	private ArrayList<Field<?>> values = new ArrayList<Field<?>>();
 	
 	public Record(){
 		

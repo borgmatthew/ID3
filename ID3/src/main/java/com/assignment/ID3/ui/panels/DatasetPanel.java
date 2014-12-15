@@ -11,6 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.assignment.ID3.parser.Parser;
+
 public class DatasetPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
@@ -18,6 +20,7 @@ public class DatasetPanel extends JPanel {
 	
 	private JLabel titleLabel = new JLabel(TITLE);
 	private JButton browseButton = new JButton("Browse");
+	private JButton parseButton = new JButton("Parse");
 	private JTextField filePath = new JTextField(10);
 	private JFileChooser fileChooser = new JFileChooser();
 	
@@ -27,7 +30,9 @@ public class DatasetPanel extends JPanel {
 		add(titleLabel, setConstraints(constraints, 1, 1, 2, 1));
 		add(filePath, setConstraints(constraints, 1, 2, 1, 1));
 		add(browseButton, setConstraints(constraints, 2, 2, 1, 1));
+		add(parseButton, setConstraints(constraints, 1, 3, 1, 1));
 		browseButton.addActionListener(new BrowseButtonListener());
+		parseButton.addActionListener(new ParseButtonListener());
 	}
 	
 	public String getFilePath(){
@@ -50,6 +55,18 @@ public class DatasetPanel extends JPanel {
 			if(result == JFileChooser.APPROVE_OPTION){
 				filePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
 			}
+		}
+		
+	}
+	
+	public class ParseButtonListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			Parser parser = new Parser();
+			parser.parse(getFilePath());
+			System.out.println(parser.getFieldTypes());
+			System.out.println(parser.getRecords().size());
 		}
 		
 	}

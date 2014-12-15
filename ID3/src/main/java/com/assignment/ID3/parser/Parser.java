@@ -11,6 +11,14 @@ public class Parser {
 
 	public Parser() {
 	}
+	
+	public ArrayList<FieldType> getFieldTypes(){
+		return fieldTypes;
+	}
+	
+	public ArrayList<Record> getRecords(){
+		return records;
+	}
 
 	public void parse(String fileName) {
 		FileHandler file = new FileHandler(fileName);
