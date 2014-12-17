@@ -95,4 +95,16 @@ public class Id3Tree {
 		values.setValues(diffValues);
 		return values;
 	}
+	
+	private void splitDiscrete(ArrayList<Record> records){
+		
+	}
+	
+	private void splitContinuous(){
+		
+	}
+	
+	public void buildTree(){
+		
+	}
 }

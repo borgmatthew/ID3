@@ -72,6 +72,7 @@ public class MainWindow extends JFrame{
 			Parser parser = new Parser(dataSet.getFilePath(), dataSet.getFieldTypes());
 			if(parser.parse()){
 				tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes());
+				tree.buildTree();
 			}else{
 				generate.setMessage(parser.getMessage());
 			}
