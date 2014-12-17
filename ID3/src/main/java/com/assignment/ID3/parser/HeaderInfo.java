@@ -2,6 +2,10 @@ package com.assignment.ID3.parser;
 
 import java.util.ArrayList;
 
+import com.assignment.ID3.tree.Field;
+import com.assignment.ID3.tree.FieldType;
+import com.assignment.ID3.tree.Record;
+
 public class HeaderInfo {
 
 	private Record record;

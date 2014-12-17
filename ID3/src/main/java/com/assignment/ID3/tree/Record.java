@@ -1,4 +1,4 @@
-package com.assignment.ID3.parser;
+package com.assignment.ID3.tree;
 
 import java.util.ArrayList;
 

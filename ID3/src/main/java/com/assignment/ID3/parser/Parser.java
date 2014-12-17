@@ -3,6 +3,10 @@ package com.assignment.ID3.parser;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.assignment.ID3.tree.Field;
+import com.assignment.ID3.tree.FieldType;
+import com.assignment.ID3.tree.Record;
+
 public class Parser {
 
 	private ArrayList<FieldType> fieldTypes;
@@ -20,25 +24,32 @@ public class Parser {
 		return records;
 	}
 
-	public void parse(String fileName) {
+	public String parse(String fileName, int targetOffset) {
 		FileHandler file = new FileHandler(fileName);
 		if (file.openFile()) {
 			try {
 				String line = file.getNextLine();
 				String[] fields = line.split(splitter);
 				fieldTypes = new HeaderInfo(getFirstRecord(fields)).getTypes();
+				
+				if(targetOffset-1 >= 0 && targetOffset-1 < fieldTypes.size()){
+					fieldTypes.set(targetOffset-1, FieldType.STRING);
+				}else{
+					return "Invalid offset";
+				}
 
 				do {
 					fields = line.split(splitter);
 					records.add(createRecord(fields));
 				} while ((line = file.getNextLine()) != null);
 			} catch (IOException ioe) {
-				System.out.println("There was an IO error when parsing the file");
+				return "An error occured while reading from file";
 			} finally {
 				file.closeFile();
 			}
+			return "File parsed successfully";
 		}else{
-			System.out.println("File was not opened");
+			return "An error occured while opening the file";
 		}
 	}
 
