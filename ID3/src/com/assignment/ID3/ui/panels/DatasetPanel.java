@@ -69,7 +69,6 @@ public class DatasetPanel extends JPanel {
 
 	public class BrowseButtonListener implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			int result = fileChooser.showOpenDialog(browseButton);
 			if (result == JFileChooser.APPROVE_OPTION) {
@@ -82,7 +81,6 @@ public class DatasetPanel extends JPanel {
 
 	public class ParseButtonListener implements ActionListener {
 
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			try {
 				targetOffset = Integer.parseInt(targetText.getText());

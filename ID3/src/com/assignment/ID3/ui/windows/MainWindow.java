@@ -73,7 +73,6 @@ public class MainWindow extends JFrame{
 	}
 	
 	public class GenerateButtonListener implements ActionListener{
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Parser parser = dataSet.getParser();
 			if(parser != null){
