@@ -9,54 +9,53 @@ import com.assignment.ID3.tree.Record;
 
 public class Parser {
 
-	private ArrayList<FieldType> fieldTypes;
+	private ArrayList<FieldType> fieldTypes = null;
 	private ArrayList<Record> records = new ArrayList<Record>();
 	private final String splitter = ",";
+	private FileHandler fileHandler;
+	private String message;
 
-	public Parser() {
+	public Parser(String fileName, ArrayList<FieldType> types) {
+		fileHandler = new FileHandler(fileName);
+		this.fieldTypes = types;
 	}
-	
-	public ArrayList<FieldType> getFieldTypes(){
-		return fieldTypes;
+
+	public String getMessage(){
+		return message;
 	}
-	
-	public ArrayList<Record> getRecords(){
+
+	public ArrayList<Record> getRecords() {
 		return records;
 	}
 
-	public String parse(String fileName, int targetOffset) {
-		FileHandler file = new FileHandler(fileName);
-		if (file.openFile()) {
-			try {
-				String line = file.getNextLine();
-				String[] fields = line.split(splitter);
-				fieldTypes = new HeaderInfo(getFirstRecord(fields)).getTypes();
-				
-				if(targetOffset-1 >= 0 && targetOffset-1 < fieldTypes.size()){
-					fieldTypes.set(targetOffset-1, FieldType.STRING);
-				}else{
-					return "Invalid offset";
-				}
+	public boolean parse() {
+		if (fileHandler.openFile()) {
+			try {		
+				String line;
+				String[] fields;
 
-				do {
+				while ((line = fileHandler.getNextLine()) != null){
 					fields = line.split(splitter);
 					records.add(createRecord(fields));
-				} while ((line = file.getNextLine()) != null);
+				}
 			} catch (IOException ioe) {
-				return "An error occured while reading from file";
+				message = "An error occured while reading from file";
+				return false;
 			} finally {
-				file.closeFile();
+				fileHandler.closeFile();
 			}
-			return "File parsed successfully";
-		}else{
-			return "An error occured while opening the file";
+			message = "File parsed successfully";
+			return true;
+		} else {
+			message = "An error occured while opening the file";
+			return false;
 		}
 	}
 
 	private Record createRecord(String[] fields) {
 		Record record = new Record();
 		for (int i = 0; i < fields.length; i++) {
-			if (fieldTypes.get(i) == FieldType.NUMERIC) {
+			if (fieldTypes.get(i) == FieldType.CONTINUOUS) {
 				double value = Double.parseDouble(fields[i]);
 				record.add(new Field<Double>(value));
 			} else {
@@ -64,13 +63,5 @@ public class Parser {
 			}
 		}
 		return record;
-	}
-
-	private Record getFirstRecord(String[] fields) {
-		Record firstRecord = new Record();
-		for (int i = 0; i < fields.length; i++) {
-			firstRecord.add(new Field<String>(fields[i]));
-		}
-		return firstRecord;
 	}
 }

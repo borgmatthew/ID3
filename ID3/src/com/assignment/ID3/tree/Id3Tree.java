@@ -20,7 +20,7 @@ public class Id3Tree {
 
 	public ColumnValues calculateDataAttributes(int field) {
 		ColumnValues values = null;
-		if (types.get(field) == FieldType.STRING) {
+		if (types.get(field) == FieldType.DISCRETE) {
 			values = calculateStringAttributes(field);
 		} else {
 			values = calculateContinuousAttributes(field);

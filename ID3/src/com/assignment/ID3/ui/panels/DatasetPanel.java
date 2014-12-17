@@ -5,44 +5,44 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import com.assignment.ID3.parser.Parser;
+import com.assignment.ID3.parser.HeaderParser;
+import com.assignment.ID3.tree.FieldType;
 
 public class DatasetPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private final String TITLE = "Data set";
 
-	private JLabel titleLabel = new JLabel(TITLE);
-	private JLabel targetOffsetLabel = new JLabel("Target column: ");
+	private JLabel fileLabel = new JLabel("File location: ");
 	private JLabel message = new JLabel(" ");
 	private JButton browseButton = new JButton("Browse");
-	private JButton loadButton = new JButton("Load");
 	private JTextField filePath = new JTextField(10);
-	private JTextField targetText = new JTextField(2);
 	private JFileChooser fileChooser = new JFileChooser();
-
-	private Parser parser = null;
-	private int targetOffset = -1;
+	private DataFields dataFields = new DataFields();
+	private JScrollPane dataFieldsScroll = new JScrollPane(dataFields);
 
 	public DatasetPanel() {
 		setLayout(new GridBagLayout());
+		setBorder(BorderFactory.createTitledBorder(TITLE));
 		GridBagConstraints constraints = new GridBagConstraints();
-		add(titleLabel, setConstraints(constraints, 0, 0, 2, 1));
-		add(filePath, setConstraints(constraints, 0, 1, 1, 1));
-		add(browseButton, setConstraints(constraints, 1, 1, 1, 1));
-		add(targetOffsetLabel, setConstraints(constraints, 0, 2, 1, 1));
-		add(targetText, setConstraints(constraints, 1, 2, 1, 1));
-		add(loadButton, setConstraints(constraints, 0, 3, 2, 1));
-		add(message, setConstraints(constraints, 0, 4, 2, 1));
+		add(fileLabel, setConstraints(constraints, 0, 0, 1, 1));
+		add(filePath, setConstraints(constraints, 1, 0, 1, 1));
+		add(browseButton, setConstraints(constraints, 2, 0, 1, 1));
+		add(message, setConstraints(constraints, 0, 1, 3, 1));
+		add(dataFieldsScroll, setConstraints(constraints, 0, 2, 3, 1));
+		dataFieldsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		dataFieldsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		browseButton.addActionListener(new BrowseButtonListener());
-		loadButton.addActionListener(new ParseButtonListener());
 	}
 
 	public String getFilePath() {
@@ -63,41 +63,31 @@ public class DatasetPanel extends JPanel {
 		return constraints;
 	}
 
-	public Parser getParser() {
-		return parser;
-	}
-
 	public class BrowseButtonListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent arg0) {
 			int result = fileChooser.showOpenDialog(browseButton);
 			if (result == JFileChooser.APPROVE_OPTION) {
-				filePath.setText(fileChooser.getSelectedFile()
-						.getAbsolutePath());
-			}
-		}
-
-	}
-
-	public class ParseButtonListener implements ActionListener {
-
-		public void actionPerformed(ActionEvent arg0) {
-			try {
-				targetOffset = Integer.parseInt(targetText.getText());
-			} catch (NumberFormatException nfe) {
-				message.setText("Invalid number");
-				return;
-			}
-			parser = new Parser();
-			String result = parser.parse(getFilePath(), targetOffset);
-			message.setText(result);
-			if(result.compareTo("File parsed successfully") != 0){
-				parser = null;
+				String path = fileChooser.getSelectedFile().getAbsolutePath();
+				filePath.setText(path);
+				HeaderParser headParse = new HeaderParser(path);
+				ArrayList<FieldType> types = headParse.parseHeaders();
+				if(types == null){
+					message.setText("Error while reading file!");
+				}else{
+					dataFields.setFieldTypes(types);
+					revalidate();
+					repaint();
+				}
 			}
 		}
 	}
 
 	public int getTargetOffset() {
-		return targetOffset-1;
+		return dataFields.getTargetColumn();
+	}
+	
+	public ArrayList<FieldType> getFieldTypes(){
+		return dataFields.getTypes();
 	}
 }

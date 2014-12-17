@@ -19,9 +19,9 @@ public class HeaderInfo {
 	private void checkTypes(){
 		for(Field<?> f : record.getFields()){
 			if(isNumeric((String)f.getValue())){
-				types.add(FieldType.NUMERIC);
+				types.add(FieldType.CONTINUOUS);
 			}else{
-				types.add(FieldType.STRING);
+				types.add(FieldType.DISCRETE);
 			}
 		}
 	}

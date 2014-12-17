@@ -12,12 +12,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 
 import com.assignment.ID3.parser.Parser;
-import com.assignment.ID3.tree.ColumnValues;
-import com.assignment.ID3.tree.Field;
 import com.assignment.ID3.tree.Id3Tree;
 import com.assignment.ID3.ui.panels.DatasetPanel;
 import com.assignment.ID3.ui.panels.GeneratePanel;
-import com.assignment.ID3.ui.panels.GraphPanel;
 import com.assignment.ID3.ui.panels.ParametersPanel;
 
 public class MainWindow extends JFrame{
@@ -27,7 +24,6 @@ public class MainWindow extends JFrame{
 	private final int WINDOW_HEIGHT = 450;
 	private final DatasetPanel dataSet = new DatasetPanel();
 	private final ParametersPanel parameters = new ParametersPanel();
-	private final GraphPanel graph = new GraphPanel();
 	private final GeneratePanel generate = new GeneratePanel(new GenerateButtonListener());
 	private Id3Tree tree;
 
@@ -54,8 +50,7 @@ public class MainWindow extends JFrame{
 		GridBagConstraints constraints = new GridBagConstraints();
 		contentPane.add(dataSet, setConstraints(constraints, 0, 0, 1, 1));
 		contentPane.add(parameters, setConstraints(constraints, 0, 1, 1, 1));
-		contentPane.add(graph, setConstraints(constraints, 1, 0, 1, 3));
-		contentPane.add(generate, setConstraints(constraints, 0, 3, 1, 1));
+		contentPane.add(generate, setConstraints(constraints, 0, 2, 1, 1));
 		setContentPane(contentPane);
 	}
 	
@@ -74,12 +69,11 @@ public class MainWindow extends JFrame{
 	
 	public class GenerateButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent arg0) {
-			Parser parser = dataSet.getParser();
-			if(parser != null){
-				tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , parser.getFieldTypes());
-				ColumnValues cv = tree.calculateDataAttributes(2);
+			Parser parser = new Parser(dataSet.getFilePath(), dataSet.getFieldTypes());
+			if(parser.parse()){
+				tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes());
 			}else{
-				generate.setMessage("Load a file first!");
+				generate.setMessage(parser.getMessage());
 			}
 		}
 		
