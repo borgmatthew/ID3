@@ -8,11 +8,17 @@ public class Node {
 	private List<Node> children;
 	private ArrayList<ArrayList<Record>> records;
 	private int offset;
+	private int nodeId;
 	
-	public Node(int offset) {
+	public Node(int offset, int nodeId) {
 		children = new ArrayList<Node>();
 		records = null;
 		this.offset = offset;
+		this.nodeId = nodeId;
+	}
+	
+	public int getNodeId(){
+		return nodeId;
 	}
 	
 	public String getName(){

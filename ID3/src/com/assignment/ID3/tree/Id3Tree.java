@@ -11,6 +11,7 @@ public class Id3Tree {
 	private List<FieldType> types;
 	private int targetAttribute;
 	private Node root;
+	private int nodeId = 0;
 
 	public Id3Tree(List<Record> records, int targetAttribute,
 			List<FieldType> types) {
@@ -159,9 +160,17 @@ public class Id3Tree {
 
 	private Node buildTree(List<Record> records, List<Integer> remainingCols) {
 		if(remainingCols.size() == 1){
-			return new Node(remainingCols.get(0));
+			Node n = new Node(remainingCols.get(0), nodeId++);
+			ArrayList<ArrayList<Record>> tmpList = new ArrayList<ArrayList<Record>>();
+			tmpList.add(new ArrayList<Record>(records));
+			n.setRecords(tmpList);
+			return n;
 		}else if(sameTarget(records)){
-			return new Node(-1);
+			Node n = new Node(targetAttribute, nodeId++);
+			ArrayList<ArrayList<Record>> tmpList = new ArrayList<ArrayList<Record>>();
+			tmpList.add(new ArrayList<Record>(records));
+			n.setRecords(tmpList);
+			return n;
 		}
 		else{
 			double maxInfoGain = 0;
@@ -173,8 +182,8 @@ public class Id3Tree {
 				}else{
 					splitted = splitContinuous(records, index);
 				}
-				double gain;
-				if((gain = new Heuristic().calculateInformationGain(convertForGain(splitted, index))) > maxInfoGain){
+				double gain = new Heuristic().calculateInformationGain(convertForGain(splitted, index));
+				if(gain > maxInfoGain){
 					maxInfoGain = gain;
 					maxInfoGainOffset = index;
 				}
@@ -189,7 +198,7 @@ public class Id3Tree {
 			
 			remainingCols.remove(remainingCols.indexOf(maxInfoGainOffset));
 			
-			Node parent = new Node(maxInfoGainOffset);
+			Node parent = new Node(maxInfoGainOffset, nodeId++);
 			parent.setRecords(splitted);
 			
 			for(ArrayList<Record> list : splitted){
@@ -233,20 +242,25 @@ public class Id3Tree {
 	}
 	
 	public void printTree(){
-		toString(root, -1);
+		toString(root, -1, ++nodeId);
 	}
 	
-	public void toString(Node n, int prevOffset){
-		for(int i = 0; i < n.getChildren().size(); i++){
-			if(prevOffset != -1){
-				System.out.println(n.getRecords().get(i).get(0).getField(prevOffset).getValue() + "->" + n.getName() + "[label=\"" + "" +"\"");
-			}
-			if(n.getRecords() != null){
-				System.out.println(n.getName() + "->" + n.getRecords().get(i).get(0).getField(n.getOffset()).getValue());
-			}else{
-				//System.out.println(n.getName() )
-			}
-			toString(n.getChildren().get(i), n.getOffset());
+	public int toString(Node parent, int prevOffset, int counter){
+
+		if(parent.getChildren().size() > 0){
+			System.out.println(parent.getNodeId() + " [label = \"" + parent.getName() + "\"]");
 		}
+		for(int i = 0; i < parent.getChildren().size(); i++){	
+			System.out.println(counter + " [label = \"" + parent.getRecords().get(i).get(0).getField(parent.getOffset()).getValue() + "\"]");
+			System.out.println(parent.getNodeId() + "->" + counter++);
+			if(parent.getChildren().get(i).getChildren().size() != 0){
+				System.out.println(counter-1 + "->" + parent.getChildren().get(i).getNodeId());
+			}else{
+				System.out.println(counter + " [label = \"" + parent.getRecords().get(i).get(0).getField(targetAttribute).getValue() + "\"]");
+				System.out.println(counter-1 + "->" + counter++);
+			}
+			counter = toString(parent.getChildren().get(i), parent.getOffset(), counter);
+		}
+		return counter;
 	}
 }

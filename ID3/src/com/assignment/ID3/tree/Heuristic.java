@@ -41,7 +41,7 @@ public class Heuristic {
 			for(InfoGainPair p : list){
 				outcomes.add(p.getOutcome());
 			}
-			sumEntropies += (list.size() / totalElements) * calculateEntropy(outcomes);
+			sumEntropies += ((double)list.size() / (double)totalElements) * calculateEntropy(outcomes);
 		}
 		
 		return totalEntropy - sumEntropies;
