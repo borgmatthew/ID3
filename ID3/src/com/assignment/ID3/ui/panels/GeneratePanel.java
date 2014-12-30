@@ -34,7 +34,7 @@ public class GeneratePanel extends JPanel {
 		constraints.gridwidth = gridWidth;
 		constraints.gridheight = gridHeight;
 		constraints.anchor = GridBagConstraints.SOUTH;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
+		//constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.insets = new Insets(1, 2, 2, 1);
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;

@@ -1,5 +1,6 @@
 package com.assignment.ID3.ui.panels;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -35,14 +36,15 @@ public class DatasetPanel extends JPanel {
 		setLayout(new GridBagLayout());
 		setBorder(BorderFactory.createTitledBorder(TITLE));
 		GridBagConstraints constraints = new GridBagConstraints();
-		add(fileLabel, setConstraints(constraints, 0, 0, 1, 1));
-		add(filePath, setConstraints(constraints, 1, 0, 1, 1));
-		add(browseButton, setConstraints(constraints, 2, 0, 1, 1));
-		add(message, setConstraints(constraints, 0, 1, 3, 1));
-		add(dataFieldsScroll, setConstraints(constraints, 0, 2, 3, 1));
+		add(fileLabel, setConstraints(constraints, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL));
+		add(filePath, setConstraints(constraints, 0, 1, 1, 1, GridBagConstraints.HORIZONTAL));
+		add(browseButton, setConstraints(constraints, 1, 1, 1, 1, GridBagConstraints.NONE));
+		add(message, setConstraints(constraints, 0, 2, 3, 1, GridBagConstraints.HORIZONTAL));
+		add(dataFieldsScroll, setConstraints(constraints, 0, 3, 3, 1, GridBagConstraints.HORIZONTAL));
 		dataFieldsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		dataFieldsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		browseButton.addActionListener(new BrowseButtonListener());
+		dataFieldsScroll.setMinimumSize(new Dimension(dataFieldsScroll.getWidth(), 100));
 	}
 
 	public String getFilePath() {
@@ -50,15 +52,15 @@ public class DatasetPanel extends JPanel {
 	}
 
 	private GridBagConstraints setConstraints(GridBagConstraints constraints,
-			int x, int y, int gridWidth, int gridHeight) {
+			int x, int y, int gridWidth, int gridHeight, int fill) {
 		constraints.gridx = x;
 		constraints.gridy = y;
 		constraints.gridwidth = gridWidth;
 		constraints.gridheight = gridHeight;
-		constraints.anchor = (x == 0) ? GridBagConstraints.WEST	: GridBagConstraints.EAST;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
+		//constraints.anchor = (x == 0) ? GridBagConstraints.WEST	: GridBagConstraints.EAST;
+		constraints.fill = fill;
 		constraints.insets = new Insets(1, 2, 2, 1);
-		constraints.weightx = (x == 0) ? 0.1 : 1.0;
+		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		return constraints;
 	}
@@ -76,8 +78,6 @@ public class DatasetPanel extends JPanel {
 					message.setText("Error while reading file!");
 				}else{
 					dataFields.setFieldTypes(types);
-					revalidate();
-					repaint();
 				}
 			}
 		}

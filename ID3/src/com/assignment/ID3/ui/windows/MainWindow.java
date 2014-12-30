@@ -15,6 +15,7 @@ import com.assignment.ID3.parser.Parser;
 import com.assignment.ID3.tree.Id3Tree;
 import com.assignment.ID3.ui.panels.DatasetPanel;
 import com.assignment.ID3.ui.panels.GeneratePanel;
+import com.assignment.ID3.ui.panels.GraphPanel;
 import com.assignment.ID3.ui.panels.ParametersPanel;
 
 public class MainWindow extends JFrame{
@@ -25,6 +26,7 @@ public class MainWindow extends JFrame{
 	private final DatasetPanel dataSet = new DatasetPanel();
 	private final ParametersPanel parameters = new ParametersPanel();
 	private final GeneratePanel generate = new GeneratePanel(new GenerateButtonListener());
+	private final GraphPanel graphPanel = new GraphPanel();
 	private Id3Tree tree;
 
 	public MainWindow(){
@@ -51,6 +53,7 @@ public class MainWindow extends JFrame{
 		contentPane.add(dataSet, setConstraints(constraints, 0, 0, 1, 1));
 		contentPane.add(parameters, setConstraints(constraints, 0, 1, 1, 1));
 		contentPane.add(generate, setConstraints(constraints, 0, 2, 1, 1));
+		contentPane.add(graphPanel, setConstraints(constraints, 1, 0, 1, 3));
 		setContentPane(contentPane);
 	}
 	
@@ -59,10 +62,10 @@ public class MainWindow extends JFrame{
 		constraints.gridy = y;
 		constraints.gridwidth = gridWidth;
 		constraints.gridheight = gridHeight;
-		constraints.anchor = (x == 0) ? GridBagConstraints.WEST : GridBagConstraints.EAST;
-		constraints.fill = (x == 0) ? GridBagConstraints.VERTICAL : GridBagConstraints.BOTH ;
+		//constraints.anchor = (x == 0) ? GridBagConstraints.WEST : GridBagConstraints.EAST;
+		constraints.fill = GridBagConstraints.BOTH ;
 		constraints.insets = new Insets(5, 5, 5, 5);
-		constraints.weightx = (x == 0) ? 0.1 : 1.0;
+		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		return constraints;
 	}
@@ -71,9 +74,17 @@ public class MainWindow extends JFrame{
 		public void actionPerformed(ActionEvent arg0) {
 			Parser parser = new Parser(dataSet.getFilePath(), dataSet.getFieldTypes());
 			if(parser.parse()){
-				tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes());
-				tree.generateTree();
-				tree.printTree();
+				if(parameters.getOverFittingChoice().compareTo("none") == 0){
+					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), 1);
+					tree.generateTree();
+				}else{
+					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), parameters.getTrainRatio());
+					tree.generateTree();
+					tree.removeOverfitting();
+				}
+				
+				graphPanel.setText(tree.printTree());
+				
 			}else{
 				generate.setMessage(parser.getMessage());
 			}

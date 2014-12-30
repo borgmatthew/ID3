@@ -102,6 +102,7 @@ public class DataFields extends JPanel {
 			comboBoxes.add(combo);
 			add(combo, setConstraints(i+1, 2, 1, 1));
 		}
+		revalidate();
 	}
 	
 	public int getTargetColumn(){
@@ -125,7 +126,7 @@ public class DataFields extends JPanel {
 		constraints.gridy = y;
 		constraints.gridwidth = gridWidth;
 		constraints.gridheight = gridHeight;
-		constraints.anchor = (x == 0) ? GridBagConstraints.WEST	: GridBagConstraints.EAST;
+		//constraints.anchor = (x == 0) ? GridBagConstraints.WEST	: GridBagConstraints.EAST;
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets(1, 2, 2, 1);
 		constraints.weightx = (x == 0) ? 0.1 : 1.0;
