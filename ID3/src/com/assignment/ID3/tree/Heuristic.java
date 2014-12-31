@@ -46,4 +46,31 @@ public class Heuristic {
 		
 		return totalEntropy - sumEntropies;
 	}
+	
+	private double splitInformation(ArrayList<ArrayList<InfoGainPair>> splittedPairs){
+		ArrayList<Field<String>> outcomes = new ArrayList<Field<String>>();
+		int totalElements = 0;
+		for(ArrayList<InfoGainPair> list : splittedPairs){
+			for(InfoGainPair p : list){
+				outcomes.add(p.getOutcome());
+				totalElements++;
+			}
+		}
+		
+		double sumSplitInfo = 0;
+		for(ArrayList<InfoGainPair> list : splittedPairs){
+			double ratio = ((double)list.size() / (double)totalElements);
+			sumSplitInfo +=  ratio * Math.log(ratio)/Math.log(2.0d);
+		}
+		return -sumSplitInfo;
+	}
+	
+	public double gainRatio(ArrayList<ArrayList<InfoGainPair>> splittedPairs){
+		double split = splitInformation(splittedPairs);
+		if(split != 0){
+			return calculateInformationGain(splittedPairs)/split;
+		}else{
+			return 1;
+		}
+	}
 }

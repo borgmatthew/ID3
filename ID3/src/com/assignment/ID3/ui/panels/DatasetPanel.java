@@ -90,4 +90,8 @@ public class DatasetPanel extends JPanel {
 	public ArrayList<FieldType> getFieldTypes(){
 		return dataFields.getTypes();
 	}
+	
+	public ArrayList<Boolean> getFieldsToUse(){
+		return dataFields.getFieldsToUse();
+	}
 }

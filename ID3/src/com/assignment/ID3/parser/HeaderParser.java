@@ -10,7 +10,7 @@ import com.assignment.ID3.tree.Record;
 public class HeaderParser {
 
 	private FileHandler fileHandler;
-	private final String splitter = ",";
+	private final String splitter = "\\s+";
 
 	public HeaderParser(String fileName) {
 		this.fileHandler = new FileHandler(fileName);
@@ -21,7 +21,8 @@ public class HeaderParser {
 		if (fileHandler.openFile()) {
 			try {
 				String line = fileHandler.getNextLine();
-				String[] fields = line.split(splitter);
+				line = line.replaceAll(splitter, ",");
+				String[] fields = line.split(",");
 				fieldTypes = new HeaderInfo(getFirstRecord(fields)).getTypes();
 			} catch (IOException ioe) {
 				fieldTypes = null;

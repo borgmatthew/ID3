@@ -75,10 +75,10 @@ public class MainWindow extends JFrame{
 			Parser parser = new Parser(dataSet.getFilePath(), dataSet.getFieldTypes());
 			if(parser.parse()){
 				if(parameters.getOverFittingChoice().compareTo("none") == 0){
-					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), 1);
+					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), dataSet.getFieldsToUse(), 1, parameters.getHeuristic());
 					tree.generateTree();
 				}else{
-					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), parameters.getTrainRatio());
+					tree = new Id3Tree(parser.getRecords(), dataSet.getTargetOffset() , dataSet.getFieldTypes(), dataSet.getFieldsToUse(), parameters.getTrainRatio(), parameters.getHeuristic());
 					tree.generateTree();
 					tree.removeOverfitting();
 				}

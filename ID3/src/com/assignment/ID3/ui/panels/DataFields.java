@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,12 +22,14 @@ public class DataFields extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<JRadioButton> radioButtons;
+	private ArrayList<JCheckBox> checkBoxes;
 	private ArrayList<JComboBox<String>> comboBoxes;
 	private ArrayList<JLabel> idLabels;
 	private ButtonGroup radioButtonGroup;
 	private JLabel isTarget = new JLabel("Target field ");
 	private JLabel type = new JLabel("Type ");
 	private JLabel field = new JLabel("Fields ");
+	private JLabel use = new JLabel("Use field");
 	private GridBagConstraints constraints = new GridBagConstraints();
 	private int targetColumn = 0;
 	
@@ -50,12 +53,17 @@ public class DataFields extends JPanel {
 			radioButtonGroup.add(radio);
 			add(radio, setConstraints(i+1, 1, 1, 1));
 			
+			JCheckBox check = new JCheckBox();
+			check.setEnabled(false);
+			checkBoxes.add(check);
+			add(check, setConstraints(i+1, 2, 1, 1));
+			
 			JComboBox<String> combo = new JComboBox<String>();
 			combo.addItem("Discrete");
 			combo.setEnabled(false);
 			combo.setSelectedIndex(0);
 			comboBoxes.add(combo);
-			add(combo, setConstraints(i+1, 2, 1, 1));
+			add(combo, setConstraints(i+1, 3, 1, 1));
 		}
 	}
 	
@@ -63,7 +71,8 @@ public class DataFields extends JPanel {
 		setEnabled(true);
 		add(field, setConstraints(0, 0, 1,1));
 		add(isTarget, setConstraints(0, 1, 1, 1));
-		add(type, setConstraints(0, 2, 1, 1));
+		add(use, setConstraints(0, 2, 1, 1));
+		add(type, setConstraints(0, 3, 1, 1));
 	}
 	
 	private void initLists(){
@@ -71,6 +80,7 @@ public class DataFields extends JPanel {
 		comboBoxes = new ArrayList<JComboBox<String>>();
 		idLabels = new ArrayList<JLabel>();
 		radioButtonGroup = new ButtonGroup();
+		checkBoxes = new ArrayList<JCheckBox>();
 	}
 	
 	public void setFieldTypes(List<FieldType> fieldTypes){
@@ -92,6 +102,12 @@ public class DataFields extends JPanel {
 			radioButtonGroup.add(radio);
 			add(radio, setConstraints(i+1, 1, 1, 1));
 			
+			JCheckBox check = new JCheckBox();
+			check.setEnabled(true);
+			check.setSelected(true);
+			checkBoxes.add(check);
+			add(check, setConstraints(i+1, 2, 1, 1));
+			
 			JComboBox<String> combo = new JComboBox<String>();
 			combo.addItem("Discrete");
 			combo.setSelectedIndex(0);
@@ -100,13 +116,21 @@ public class DataFields extends JPanel {
 				combo.setSelectedIndex(1);
 			}
 			comboBoxes.add(combo);
-			add(combo, setConstraints(i+1, 2, 1, 1));
+			add(combo, setConstraints(i+1, 3, 1, 1));
 		}
 		revalidate();
 	}
 	
 	public int getTargetColumn(){
 		return targetColumn;
+	}
+	
+	public ArrayList<Boolean> getFieldsToUse(){
+		ArrayList<Boolean> use = new ArrayList<Boolean>();
+		for(JCheckBox c : checkBoxes){
+			use.add(c.isSelected());
+		}
+		return use;
 	}
 	
 	public ArrayList<FieldType> getTypes(){

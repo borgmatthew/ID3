@@ -10,6 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.assignment.ID3.tree.HeuristicType;
+
 public class ParametersPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -20,18 +22,33 @@ public class ParametersPanel extends JPanel {
 	private JLabel trainRatio = new JLabel("Ratio of training : verification");
 	private JTextField trainRatioBox = new JTextField();
 	private JLabel errorMessage = new JLabel("");
+	private JLabel heuristicMeasure = new JLabel("Choose heuristic");
+	private JComboBox<String> heuristicCombo = new JComboBox<String>();
 
 	public ParametersPanel() {
 		setLayout(new GridBagLayout());
 		setBorder(BorderFactory.createTitledBorder(TITLE));
 		overFittingCombo.addItem("none");
 		overFittingCombo.addItem("Reduced Error Pruning");
+		heuristicCombo.addItem("Information Gain");
+		heuristicCombo.addItem("Gain Ratio");
 		GridBagConstraints constraints = new GridBagConstraints();
 		add(overFitting, setConstraints(constraints, 0,0,1,1));
 		add(overFittingCombo, setConstraints(constraints, 1, 0, 1, 1));
 		add(trainRatio, setConstraints(constraints, 0, 1, 1, 1));
 		add(trainRatioBox, setConstraints(constraints, 1, 1, 1, 1));
-		add(errorMessage, setConstraints(constraints, 0, 2, 2, 1));
+		add(heuristicMeasure, setConstraints(constraints, 0, 2, 1, 1));
+		add(heuristicCombo, setConstraints(constraints, 1, 2, 1, 1));
+		add(errorMessage, setConstraints(constraints, 0, 3, 2, 1));
+	}
+	
+	public HeuristicType getHeuristic(){
+		if(((String)(heuristicCombo.getSelectedItem())).compareTo("Information Gain") == 0){
+			return HeuristicType.InfoGain;
+		}
+		else{
+			return HeuristicType.GainRatio;
+		}
 	}
 	
 	private GridBagConstraints setConstraints(GridBagConstraints constraints,

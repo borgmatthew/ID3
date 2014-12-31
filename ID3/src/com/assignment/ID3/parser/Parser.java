@@ -11,7 +11,7 @@ public class Parser {
 
 	private ArrayList<FieldType> fieldTypes = null;
 	private ArrayList<Record> records = new ArrayList<Record>();
-	private final String splitter = ",";
+	private final String splitter = "\\s+";
 	private FileHandler fileHandler;
 	private String message;
 
@@ -35,7 +35,8 @@ public class Parser {
 				String[] fields;
 
 				while ((line = fileHandler.getNextLine()) != null){
-					fields = line.split(splitter);
+					line = line.replaceAll(splitter, ",");
+					fields = line.split(",");
 					records.add(createRecord(fields));
 				}
 			} catch (IOException ioe) {

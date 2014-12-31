@@ -8,19 +8,21 @@ import java.util.Random;
 
 public class Id3Tree {
 
-	private List<Record> records;
 	private List<FieldType> types;
 	private List<Record> trainRecords;
 	private List<Record> verificationRecords;
+	private List<Boolean> useFields;
+	private HeuristicType heuristic;
 	private int targetAttribute;
 	private Node root;
 	private int nodeId = 0;
 
 	public Id3Tree(List<Record> records, int targetAttribute,
-			List<FieldType> types, double trainRatio) {
-		this.records = records;
+			List<FieldType> types, List<Boolean> toUse, double trainRatio, HeuristicType heuristicType) {
 		this.types = types;
+		this.heuristic = heuristicType;
 		this.targetAttribute = targetAttribute;
+		this.useFields = toUse;
 		if (trainRatio == 1) {
 			trainRecords = records;
 		} else {
@@ -33,91 +35,7 @@ public class Id3Tree {
 				records.remove(index);
 			}
 			verificationRecords = records;
-			records = null;
 		}
-	}
-
-	public ColumnValues calculateDataAttributes(int field) {
-		ColumnValues values = null;
-		if (types.get(field) == FieldType.DISCRETE) {
-			values = calculateStringAttributes(field);
-		} else {
-			values = calculateContinuousAttributes(field);
-		}
-		return values;
-	}
-
-	private ColumnValues calculateStringAttributes(int field) {
-		ColumnValues values = new ColumnValues();
-		ArrayList<Field<?>> diffValues = new ArrayList<Field<?>>();
-		ArrayList<Integer> quantity = new ArrayList<Integer>();
-
-		for (int i = 0; i < records.size(); i++) {
-			int index = -1;
-
-			for (int j = 0; j < diffValues.size(); j++) {
-				if (((String) (records.get(i).getField(field).getValue()))
-						.compareTo((String) diffValues.get(j).getValue()) == 0) {
-					index = j;
-					break;
-				}
-			}
-
-			if (index == -1) {
-				diffValues.add(records.get(i).getField(field));
-				quantity.add(1);
-			} else {
-				quantity.set(index, quantity.get(index) + 1);
-			}
-		}
-		values.setQuantity(quantity);
-		values.setValues(diffValues);
-		return values;
-	}
-
-	private ColumnValues calculateContinuousAttributes(final int field) {
-		ColumnValues values = new ColumnValues();
-		ArrayList<Field<?>> diffValues = new ArrayList<Field<?>>();
-		ArrayList<Integer> quantity = new ArrayList<Integer>();
-
-		Comparator<Record> numericComparator = new Comparator<Record>() {
-			public int compare(Record rec1, Record rec2) {
-				int result = 0;
-				if ((Double) rec1.getField(field).getValue() < (Double) rec2
-						.getField(field).getValue()) {
-					result = -1;
-				} else if ((Double) (rec1.getField(field).getValue()) == (Double) (rec2
-						.getField(field).getValue())) {
-					result = 0;
-				} else if ((Double) rec1.getField(field).getValue() > (Double) rec2
-						.getField(field).getValue()) {
-					result = 1;
-				}
-				return result;
-			}
-		};
-
-		Collections.sort(records, numericComparator);
-
-		String outcome = (String) records.get(0).getField(targetAttribute)
-				.getValue();
-
-		for (int i = 1; i < records.size(); i++) {
-			if (outcome.compareTo((String) records.get(i)
-					.getField(targetAttribute).getValue()) != 0) {
-				diffValues.add(records.get(i).getField(field));
-				quantity.add(1);
-				outcome = (String) records.get(i).getField(targetAttribute)
-						.getValue();
-			} else {
-				quantity.set(quantity.size() - 1,
-						quantity.get(quantity.size() - 1) + 1);
-			}
-		}
-
-		values.setQuantity(quantity);
-		values.setValues(diffValues);
-		return values;
 	}
 
 	private ArrayList<ArrayList<Record>> splitDiscrete(List<Record> records,
@@ -167,14 +85,18 @@ public class Id3Tree {
 
 		Collections.sort(records, numericComparator);
 
-		String prevOutcome = "";
-		for (int i = 0; i < records.size(); i++) {
-			if (prevOutcome.compareTo((String) records.get(i)
-					.getField(targetAttribute).getValue()) != 0) {
+		String prevOutcome = (String) records.get(0).getField(targetAttribute).getValue();
+		double prevValue = (Double) records.get(0).getField(field).getValue();
+		result.add(new ArrayList<Record>());
+		result.get(result.size() - 1).add(records.get(0));
+		
+		for (int i = 1; i < records.size(); i++) {
+			if (prevOutcome.compareTo((String) records.get(i).getField(targetAttribute).getValue()) != 0 && prevValue != (Double) records.get(i).getField(field).getValue()) {
 				result.add(new ArrayList<Record>());
-				prevOutcome = (String) records.get(i).getField(targetAttribute)
-						.getValue();
 			}
+			prevValue = (Double) records.get(i).getField(field).getValue();
+			prevOutcome = (String) records.get(i).getField(targetAttribute)
+					.getValue();
 			result.get(result.size() - 1).add(records.get(i));
 		}
 
@@ -195,7 +117,7 @@ public class Id3Tree {
 			n.setRecords(tmpList);
 			return n;
 		} else {
-			double maxInfoGain = 0;
+			double maxInfoGain = -1;
 			int maxInfoGainOffset = -1;
 			for (Integer index : remainingCols) {
 				ArrayList<ArrayList<Record>> splitted;
@@ -204,12 +126,19 @@ public class Id3Tree {
 				} else {
 					splitted = splitContinuous(records, index);
 				}
-				double gain = new Heuristic()
-						.calculateInformationGain(convertForGain(splitted,
-								index));
+				double gain;
+				if(heuristic == HeuristicType.InfoGain){
+					gain = new Heuristic().calculateInformationGain(convertForGain(splitted,index));
+				}else{
+					gain = new Heuristic().gainRatio(convertForGain(splitted,index));
+				}
+				
 				if (gain > maxInfoGain) {
 					maxInfoGain = gain;
 					maxInfoGainOffset = index;
+				}
+				if(maxInfoGainOffset == -1){
+					System.out.println(gain);
 				}
 			}
 
@@ -262,7 +191,7 @@ public class Id3Tree {
 	public void generateTree() {
 		ArrayList<Integer> remainingCols = new ArrayList<Integer>();
 		for (int i = 0; i < types.size(); i++) {
-			if (i != targetAttribute) {
+			if (i != targetAttribute && useFields.get(i)) {
 				remainingCols.add(i);
 			}
 		}
@@ -290,13 +219,6 @@ public class Id3Tree {
 				builder.append(parent.getChildren().get(i).getNodeId() + " [label = \"" + (String)parent.getRecords().get(i).get(0).getField(targetAttribute).getValue() + "\"]\n");
 				builder.append(parent.getNodeId() + "->" + parent.getChildren().get(i).getNodeId() + "[label = \"" + parent.getRecords().get(i).get(0).getField(parent.getOffset()).getValue() + "\"]\n");
 			}
-
-//			if (parent.getChildren().get(i).getChildren().size() != 0) {
-//				builder.append(counter - 1 + "->" + parent.getChildren().get(i).getNodeId() + "\n");
-//			} else {
-//				builder.append(counter + " [label = \""  + parent.getRecords().get(i).get(0).getField(targetAttribute).getValue() + "\"]\n");
-//				builder.append(counter - 1 + "->" + counter++ + "\n");
-//			}
 			counter = toString(parent.getChildren().get(i), parent.getOffset(), counter, builder);
 		}
 		return counter;
