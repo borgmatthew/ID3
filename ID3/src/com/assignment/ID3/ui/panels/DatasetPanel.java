@@ -42,7 +42,7 @@ public class DatasetPanel extends JPanel {
 		add(message, setConstraints(constraints, 0, 2, 3, 1, GridBagConstraints.HORIZONTAL));
 		add(dataFieldsScroll, setConstraints(constraints, 0, 3, 3, 1, GridBagConstraints.HORIZONTAL));
 		dataFieldsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		dataFieldsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		dataFieldsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		browseButton.addActionListener(new BrowseButtonListener());
 		dataFieldsScroll.setMinimumSize(new Dimension(dataFieldsScroll.getWidth(), 100));
 	}

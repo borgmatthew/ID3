@@ -84,6 +84,7 @@ public class DataFields extends JPanel {
 	}
 	
 	public void setFieldTypes(List<FieldType> fieldTypes){
+		targetColumn = 0;
 		initLists();
 		removeAll();
 		addLabels();

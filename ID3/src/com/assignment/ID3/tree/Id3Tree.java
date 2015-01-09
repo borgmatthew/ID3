@@ -18,7 +18,8 @@ public class Id3Tree {
 	private int nodeId = 0;
 
 	public Id3Tree(List<Record> records, int targetAttribute,
-			List<FieldType> types, List<Boolean> toUse, double trainRatio, HeuristicType heuristicType) {
+			List<FieldType> types, List<Boolean> toUse, double trainRatio,
+			HeuristicType heuristicType) {
 		this.types = types;
 		this.heuristic = heuristicType;
 		this.targetAttribute = targetAttribute;
@@ -51,11 +52,11 @@ public class Id3Tree {
 
 		Collections.sort(records, discreteComparator);
 
-		String prev = "";
+		String prevValue = "";
 		for (Record r : records) {
-			if (((String) (r.getField(field).getValue())).compareTo(prev) != 0) {
+			if (((String) (r.getField(field).getValue())).compareTo(prevValue) != 0) {
 				result.add(new ArrayList<Record>());
-				prev = (String) (r.getField(field).getValue());
+				prevValue = (String) (r.getField(field).getValue());
 			}
 			result.get(result.size() - 1).add(r);
 		}
@@ -85,13 +86,17 @@ public class Id3Tree {
 
 		Collections.sort(records, numericComparator);
 
-		String prevOutcome = (String) records.get(0).getField(targetAttribute).getValue();
+		String prevOutcome = (String) records.get(0).getField(targetAttribute)
+				.getValue();
 		double prevValue = (Double) records.get(0).getField(field).getValue();
 		result.add(new ArrayList<Record>());
-		result.get(result.size() - 1).add(records.get(0));
-		
+		result.get(0).add(records.get(0));
+
 		for (int i = 1; i < records.size(); i++) {
-			if (prevOutcome.compareTo((String) records.get(i).getField(targetAttribute).getValue()) != 0 && prevValue != (Double) records.get(i).getField(field).getValue()) {
+			if (prevOutcome.compareTo((String) records.get(i)
+					.getField(targetAttribute).getValue()) != 0
+					&& prevValue != (Double) records.get(i).getField(field)
+							.getValue()) {
 				result.add(new ArrayList<Record>());
 			}
 			prevValue = (Double) records.get(i).getField(field).getValue();
@@ -127,21 +132,22 @@ public class Id3Tree {
 					splitted = splitContinuous(records, index);
 				}
 				double gain;
-				if(heuristic == HeuristicType.InfoGain){
-					gain = new Heuristic().calculateInformationGain(convertForGain(splitted,index));
-				}else{
-					gain = new Heuristic().gainRatio(convertForGain(splitted,index));
+				if (heuristic == HeuristicType.InfoGain) {
+					gain = new Heuristic()
+							.calculateInformationGain(convertForGain(splitted,
+									index));
+				} else {
+					gain = new Heuristic().gainRatio(convertForGain(splitted,
+							index));
 				}
-				
-				if (gain > maxInfoGain) {
+
+				if (gain >= maxInfoGain) {
 					maxInfoGain = gain;
 					maxInfoGainOffset = index;
 				}
-				if(maxInfoGainOffset == -1){
-					System.out.println(gain);
-				}
-			}
 
+			}
+			System.out.println("offset: " + maxInfoGainOffset + " ratio: " + maxInfoGain);
 			ArrayList<ArrayList<Record>> splitted;
 			if (types.get(maxInfoGainOffset) == FieldType.DISCRETE) {
 				splitted = splitDiscrete(records, maxInfoGainOffset);
@@ -178,14 +184,14 @@ public class Id3Tree {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean sameTarget(List<Record> records) {
-		ArrayList<Field<String>> outcomes = new ArrayList<Field<String>>();
+		String prev = (String)records.get(0).getField(targetAttribute).getValue();
 		for (Record r : records) {
-			outcomes.add((Field<String>) r.getField(targetAttribute));
+			if(prev.compareTo((String)r.getField(targetAttribute).getValue()) != 0){
+				return false;
+			}
 		}
-		return new AttributeCounter().calculateStringAttributes(outcomes)
-				.getValues().size() == 1;
+		return true;
 	}
 
 	public void generateTree() {
@@ -205,21 +211,24 @@ public class Id3Tree {
 		return builder.toString();
 	}
 
-	public int toString(Node parent, int prevOffset, int counter, StringBuilder builder) {
+	public int toString(Node parent, int prevOffset, int counter,
+			StringBuilder builder) {
 
 		if (parent.getChildren().size() > 0) {
-			builder.append(parent.getNodeId() + " [label = \"" + parent.getName() + "\"]\n");
+			builder.append(parent.getNodeId() + " [label = \""
+					+ parent.getName() + "\"]\n");
 		}
 		for (int i = 0; i < parent.getChildren().size(); i++) {
-			
-			if(parent.getChildren().get(i).getChildren().size() != 0){
-				builder.append(parent.getChildren().get(i).getNodeId() + " [label = \"" + parent.getChildren().get(i).getName() + "\"]\n");
+
+			if (parent.getChildren().get(i).getChildren().size() != 0) {
+				builder.append(parent.getChildren().get(i).getNodeId()	+ " [label = \"" + parent.getChildren().get(i).getName() + "\"]\n");
 				builder.append(parent.getNodeId() + "->" + parent.getChildren().get(i).getNodeId() + "[label = \"" + parent.getRecords().get(i).get(0).getField(parent.getOffset()).getValue() + "\"]\n");
-			}else{
-				builder.append(parent.getChildren().get(i).getNodeId() + " [label = \"" + (String)parent.getRecords().get(i).get(0).getField(targetAttribute).getValue() + "\"]\n");
-				builder.append(parent.getNodeId() + "->" + parent.getChildren().get(i).getNodeId() + "[label = \"" + parent.getRecords().get(i).get(0).getField(parent.getOffset()).getValue() + "\"]\n");
+			} else {
+				builder.append(parent.getChildren().get(i).getNodeId() + " [shape = \"box\" label = \""	+ (String) parent.getRecords().get(i).get(0).getField(targetAttribute).getValue() + "\"]\n");
+				builder.append(parent.getNodeId() + "->"  + parent.getChildren().get(i).getNodeId() + "[label = \""	+ parent.getRecords().get(i).get(0).getField(parent.getOffset()).getValue()	+ "\"]\n");
 			}
-			counter = toString(parent.getChildren().get(i), parent.getOffset(), counter, builder);
+			counter = toString(parent.getChildren().get(i), parent.getOffset(),
+					counter, builder);
 		}
 		return counter;
 	}
@@ -230,22 +239,28 @@ public class Id3Tree {
 			int childOffset = -1;
 			for (int i = 0; i < n.getChildren().size(); i++) {
 				if (types.get(fieldId) == FieldType.DISCRETE) {
-					if(((String) (r.getField(fieldId).getValue())).compareTo((String)n.getRecords().get(i).get(0).getField(fieldId).getValue()) == 0){
+					if (((String) (r.getField(fieldId).getValue()))
+							.compareTo((String) n.getRecords().get(i).get(0)
+									.getField(fieldId).getValue()) == 0) {
 						childOffset = i;
 						break;
 					}
-				}else{
+				} else {
 					double value = (Double) r.getField(fieldId).getValue();
 					int maxSize = n.getRecords().get(i).size();
-					if(value >= (Double)n.getRecords().get(i).get(0).getField(fieldId).getValue() && value <= (Double)n.getRecords().get(i).get(maxSize-1).getField(fieldId).getValue()){
+					if (value >= (Double) n.getRecords().get(i).get(0)
+							.getField(fieldId).getValue()
+							&& value <= (Double) n.getRecords().get(i)
+									.get(maxSize - 1).getField(fieldId)
+									.getValue()) {
 						childOffset = i;
 						break;
 					}
 				}
 			}
-			if(childOffset != -1){
+			if (childOffset != -1) {
 				return classify(n.getChildren().get(childOffset), r);
-			}else{
+			} else {
 				return "UNCLASSIFIED";
 			}
 		} else {
@@ -253,59 +268,62 @@ public class Id3Tree {
 					.getField(targetAttribute).getValue();
 		}
 	}
-	
-	public int verifyTree(){
+
+	public int verifyTree() {
 		int good = 0;
-		for(Record r:verificationRecords){
+		for (Record r : verificationRecords) {
 			String outcome = classify(root, r);
-			if(outcome.compareTo((String)r.getField(targetAttribute).getValue()) == 0){
+			if (outcome.compareTo((String) r.getField(targetAttribute)
+					.getValue()) == 0) {
 				good++;
 			}
 		}
 		return good;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private String countMostFrequentOutcome(Node n){
+	private String countMostFrequentOutcome(Node n) {
 		ArrayList<ArrayList<Record>> records = n.getRecords();
 		ArrayList<Field<String>> outcomesOnly = new ArrayList<Field<String>>();
-		for(ArrayList<Record> list : records){
-			for(Record r : list){
-				outcomesOnly.add((Field<String>)r.getField(targetAttribute));
+		for (ArrayList<Record> list : records) {
+			for (Record r : list) {
+				outcomesOnly.add((Field<String>) r.getField(targetAttribute));
 			}
 		}
-		ColumnValues cv = new AttributeCounter().calculateStringAttributes(outcomesOnly);
+		ColumnValues cv = new AttributeCounter()
+				.calculateStringAttributes(outcomesOnly);
 		int maxIndex = 0;
 		int max = 0;
-		for(int i = 1; i < cv.getQuantities().size(); i++){
-			if(cv.getQuantities().get(i) > max){
+		for (int i = 1; i < cv.getQuantities().size(); i++) {
+			if (cv.getQuantities().get(i) > max) {
 				maxIndex = i;
 			}
 		}
-		return (String)cv.getValues().get(maxIndex).getValue();
+		return (String) cv.getValues().get(maxIndex).getValue();
 	}
-	
-	public void removeOverfitting(){
-		if(verificationRecords != null){
+
+	public void removeOverfitting() {
+		if (verificationRecords != null) {
 			pruneTree(root);
 		}
 	}
-	
-	public int pruneTree(Node n){
-		if(n.getChildren().size() == 0){
+
+	public int pruneTree(Node n) {
+		if (n.getChildren().size() == 0) {
 			return verifyTree();
-		}else{
+		} else {
 			int goodClassifications = 0;
-			for(int i=0; i<n.getChildren().size(); i++){
+			for (int i = 0; i < n.getChildren().size(); i++) {
 				goodClassifications = pruneTree(n.getChildren().get(i));
 				Node child = n.getChildren().get(i);
-				String outcome = countMostFrequentOutcome(n.getChildren().get(i));
+				String outcome = countMostFrequentOutcome(n.getChildren()
+						.get(i));
 				Node temp = new Node(child.getOffset(), child.getNodeId());
 				createTempNode(temp, outcome);
-				
+
 				n.getChildren().set(i, temp);
 				int newGoodClassifications = verifyTree();
-				if(newGoodClassifications < goodClassifications){
+				if (newGoodClassifications < goodClassifications) {
 					n.getChildren().set(i, child);
 				}
 			}
@@ -314,10 +332,10 @@ public class Id3Tree {
 	}
 
 	private void createTempNode(Node temp, String outcome) {
-		ArrayList<ArrayList<Record>> tempList= new ArrayList<ArrayList<Record>>();
+		ArrayList<ArrayList<Record>> tempList = new ArrayList<ArrayList<Record>>();
 		ArrayList<Record> tempList1 = new ArrayList<Record>();
 		Record r = new Record();
-		for(int j=0;j<targetAttribute; j++){
+		for (int j = 0; j < targetAttribute; j++) {
 			r.add(new Field<String>(""));
 		}
 		r.add(new Field<String>(outcome));

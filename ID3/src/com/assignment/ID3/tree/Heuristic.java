@@ -70,7 +70,7 @@ public class Heuristic {
 		if(split != 0){
 			return calculateInformationGain(splittedPairs)/split;
 		}else{
-			return 1;
+			return 0;
 		}
 	}
 }
