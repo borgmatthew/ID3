@@ -48,13 +48,9 @@ public class Heuristic {
 	}
 	
 	private double splitInformation(ArrayList<ArrayList<InfoGainPair>> splittedPairs){
-		ArrayList<Field<String>> outcomes = new ArrayList<Field<String>>();
 		int totalElements = 0;
 		for(ArrayList<InfoGainPair> list : splittedPairs){
-			for(InfoGainPair p : list){
-				outcomes.add(p.getOutcome());
-				totalElements++;
-			}
+			totalElements += list.size();
 		}
 		
 		double sumSplitInfo = 0;

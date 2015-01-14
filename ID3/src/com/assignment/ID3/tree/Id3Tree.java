@@ -114,6 +114,9 @@ public class Id3Tree {
 			ArrayList<ArrayList<Record>> tmpList = new ArrayList<ArrayList<Record>>();
 			tmpList.add(new ArrayList<Record>(records));
 			n.setRecords(tmpList);
+			//Count most frequent outcome and set that as result
+			String mostFrequent = countMostFrequentOutcome(n);
+			createTempNode(n, mostFrequent);
 			return n;
 		} else if (sameTarget(records)) {
 			Node n = new Node(targetAttribute, nodeId++);
@@ -124,6 +127,7 @@ public class Id3Tree {
 		} else {
 			double maxInfoGain = -1;
 			int maxInfoGainOffset = -1;
+			//Calculate heuristic for every attribute
 			for (Integer index : remainingCols) {
 				ArrayList<ArrayList<Record>> splitted;
 				if (types.get(index) == FieldType.DISCRETE) {
@@ -147,7 +151,8 @@ public class Id3Tree {
 				}
 
 			}
-			System.out.println("offset: " + maxInfoGainOffset + " ratio: " + maxInfoGain);
+			
+			//split data with attribute that scored best
 			ArrayList<ArrayList<Record>> splitted;
 			if (types.get(maxInfoGainOffset) == FieldType.DISCRETE) {
 				splitted = splitDiscrete(records, maxInfoGainOffset);
@@ -155,8 +160,10 @@ public class Id3Tree {
 				splitted = splitContinuous(records, maxInfoGainOffset);
 			}
 
+			//remove attribute from list of available attributes
 			remainingCols.remove(remainingCols.indexOf(maxInfoGainOffset));
 
+			//create node and add its children
 			Node parent = new Node(maxInfoGainOffset, nodeId++);
 			parent.setRecords(splitted);
 
